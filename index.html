@@ -9,13 +9,13 @@
 <style>
 :root{--bg:#F5F3EE;--card:#FBFAF7;--card2:#EFECE6;--line:#E3DFD7;--tx:#34373B;--mu:#8C8981;--acc:#55708C;--acc2:#E4E9EE;--red:#B9654A;--red2:#F3E4DE;--ink:#43474C;--ok:#5F876B}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,system-ui,"SF Pro Text",Inter,Roboto,sans-serif;padding-bottom:84px;letter-spacing:-.1px}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,system-ui,"SF Pro Text",Inter,Roboto,sans-serif;padding-bottom:100px;letter-spacing:-.1px}
 header{padding:16px 18px 6px;display:flex;align-items:center;gap:8px}
 header h1{font-size:22px;font-weight:600;letter-spacing:-.5px;margin:0}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(245,243,238,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;border:0;color:var(--mu);padding:14px 2px 16px;font-size:13px;font-weight:500;cursor:pointer;position:relative}
-nav button b{display:none}
-nav button.on{color:var(--ink)}nav button.on:after{content:"";position:absolute;top:0;left:30%;right:30%;height:2px;background:var(--acc);border-radius:2px}
+nav{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;display:flex;gap:4px;background:#43474C;border-radius:26px;padding:5px;z-index:5;box-shadow:0 6px 20px rgba(52,55,59,.18)}
+nav button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:none;border:0;color:#C9C5BD;padding:11px 8px;border-radius:21px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:flex .2s,background .2s}
+nav button span{display:none}
+nav button.on{flex:2.4;background:#F5F3EE;color:#34373B}nav button.on span{display:inline}
 main{padding:0 16px;max-width:720px;margin:0 auto}
 h2{font-size:24px;font-weight:600;letter-spacing:-.6px;margin:14px 0 10px}h3{font-size:15px;font-weight:600;margin:0 0 10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
@@ -78,10 +78,10 @@ td{padding:8px 4px;border-top:1px solid var(--line);text-align:right}
 <header><h1>Кикер</h1><span class="muted grow" id="sub"></span><span class="muted" id="sync" style="font-size:12px"></span><button class="mini" data-act="pullNow" aria-label="Обновить">⟳</button><button class="mini" data-act="tab" data-tab="more" aria-label="Настройки">⚙︎</button></header>
 <main id="app"></main>
 <nav>
-<button data-act="tab" data-tab="rating"><b>🏆</b>Рейтинг</button>
-<button data-act="tab" data-tab="session"><b>🍻</b>Вечер</button>
-<button data-act="tab" data-tab="tour"><b>🎯</b>Турнир</button>
-<button data-act="tab" data-tab="players"><b>👥</b>Игроки</button>
+<button data-act="tab" data-tab="rating" aria-label="Рейтинг"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10M17 4v8a5 5 0 0 1-10 0V4"/><circle cx="5" cy="9" r="2"/><circle cx="19" cy="9" r="2"/></svg><span>Рейтинг</span></button>
+<button data-act="tab" data-tab="session" aria-label="Вечер"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21h6a1 1 0 0 0 1-1v-3.6c0-1.4.3-2.8.85-4l.3-.7c.56-1.25.85-2.25.85-3.65V4a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v4c0 1.4.3 2.4.85 3.65l.3.7A10 10 0 0 1 8 16.4V20a1 1 0 0 0 1 1zM6 8h12"/></svg><span>Вечер</span></button>
+<button data-act="tab" data-tab="tour" aria-label="Турнир"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h5v4H3zM3 15h5v4H3zM8 7h3v10H8M11 12h3M14 10h6v4h-6z"/></svg><span>Турнир</span></button>
+<button data-act="tab" data-tab="players" aria-label="Игроки"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.85"/></svg><span>Игроки</span></button>
 </nav>
 <div id="modal" class="modal hidden"><div class="sheet" id="sheet"></div></div>
 <script>

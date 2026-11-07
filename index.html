@@ -15,7 +15,7 @@ header h1{font-size:22px;font-weight:600;letter-spacing:-.5px;margin:0}
 nav{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;display:flex;gap:4px;background:#FBFAF7;border:1px solid #E3DFD7;border-radius:26px;padding:5px;z-index:5;box-shadow:0 6px 20px rgba(52,55,59,.08)}
 nav button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:none;border:0;color:#8C8981;padding:11px 8px;border-radius:21px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:flex .2s,background .2s}
 nav button span{display:none}
-nav button.on{flex:2.4;background:#8A7B6B;color:#FBFAF7}nav button.on span{display:inline}
+nav button.on{flex:2.4;background:#55708C;color:#FBFAF7}nav button.on span{display:inline}
 main{padding:0 16px;max-width:720px;margin:0 auto}
 h2{font-size:24px;font-weight:600;letter-spacing:-.6px;margin:14px 0 10px}h3{font-size:15px;font-weight:600;margin:0 0 10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
@@ -149,6 +149,7 @@ function calc(){
     s.hist.push(Math.round(R[id]))})}
   return{R:RR['2'],st:SS['2'],R1:RR['1'],st1:SS['1']};
 }
+const UNDO_MS=15*60*1000;let CT=null;function askConfirm(k){CONFIRM=k;render();clearTimeout(CT);CT=setTimeout(()=>{if(CONFIRM===k){CONFIRM=null;render()}},4000)}
 const RD=d=>d==='1'?C.R1:C.R, SD=d=>d==='1'?C.st1:C.st;
 let RMODE='2',PMODE='2';
 function lean(s){if(!s)return null;const a=s.ag>=2?s.aw/s.ag:null,d=s.dg>=2?s.dw/s.dg:null;
@@ -229,7 +230,7 @@ function editorHTML(own,o,title){const c=o.cur;if(!c)return'';
     ${t.length===2?`<button class="mini" data-act="swap" data-own="${own}" data-k="${k}">⇅ позиции</button>`:''}
     <input class="score" type="number" inputmode="numeric" min="0" data-sc="${k}" data-own="${own}" value="${esc(c['s'+k])}" placeholder="голы"></div>`};
   const on=new Set([...c.a,...c.b]),rest=c.fixed?[]:o.ids.filter(i=>!on.has(i));
-  return`<div class="card"><div class="row between"><h3>${title}</h3>${c.fixed?'':`<button class="mini" data-act="regen" data-own="${own}">🔀 другая расстановка</button>`}</div>
+  return`<div class="card"><h3>${title}</h3>
   <div class="match">${team('a','Синие','blue')}<div class="vs">vs</div>${team('b','Красные','red')}</div>
   ${rest.length?`<p class="muted" style="margin:10px 0 0">Отдыхают: ${rest.map(i=>esc(nm(i))).join(', ')}</p>`:''}
   <div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="mini" data-act="togpg" data-own="${own}">⚽ Голы игроков: ${o.pg?'вкл':'выкл'}</button>${!c.fixed&&o.ids.length>=4?`<button class="mini" data-act="fmt" data-own="${own}">${c.a.length===2?'→ 1 на 1':'→ 2 на 2'}</button>`:''}</div><div class="row" style="margin-top:8px"><span class="muted">Игра до</span><select data-chg="setto" data-own="${own}" style="width:auto">${[10,8,7,6,5,3].map(n=>`<option ${+(o.to||10)===n?'selected':''}>${n}</option>`).join('')}</select></div>
@@ -241,7 +242,7 @@ const topScorer=tb=>tb.filter(x=>x.pg>0).sort((a,b)=>b.pg-a.pg||a.g-b.g)[0];
 function gameLine(m){const w=m.sa>m.sb;const t=x=>x.map(i=>esc(nm(i))).join(' / ');
   return`<span class="grow"><span class="${w?'w':'lo'}">${t(m.a)}</span> <span class="muted">vs</span> <span class="${w?'lo':'w'}">${t(m.b)}</span></span><span class="s">${m.sa}:${m.sb}</span>`}
 function gamesList(ms,undo){if(!ms.length)return'';const l=[...ms].reverse();
-  return`<div class="card"><h3>Сыгранные игры</h3>${l.map((m,k)=>`<div class="game">${gameLine(m)}${undo&&k===0?`<button class="mini" data-act="undo" data-id="${m.id}">↩︎</button>`:''}</div>`).join('')}</div>`}
+  return`<div class="card"><h3>Сыгранные игры</h3>${l.map((m,k)=>`<div class="game">${gameLine(m)}${undo&&k===0&&Date.now()-m.ts<UNDO_MS?(CONFIRM==='u'+m.id?`<button class="mini" style="background:#B9654A;color:#fff" data-act="undo" data-id="${m.id}">Удалить игру?</button>`:`<button class="mini" data-act="undo" data-id="${m.id}">Отменить</button>`):''}</div>`).join('')}</div>`}
 
 /* ---------- экраны ---------- */
 function vRating(){
@@ -302,7 +303,7 @@ function bmHTML(t,m,r,i){const nmT=x=>x==null?`<span class="muted">${r===0?'пр
   const sc=m.sc?m.sc.split(':'):['',''];const nx=r+1<t.br.length?t.br[r+1][i>>1]:null;
   return`<div class="bm"><div class="t ${m.w!=null&&m.w===m.a?'win':''}"><span>${nmT(m.a)}</span><b>${sc[0]}</b></div><div class="t ${m.w!=null&&m.w===m.b?'win':''}"><span>${nmT(m.b)}</span><b>${sc[1]}</b></div>
   ${m.a!=null&&m.b!=null&&m.w==null?`<button class="mini" data-act="playBr" data-r="${r}" data-i="${i}">▶️ Ввести счёт</button>`:''}
-  ${m.mid&&(!nx||nx.w==null)?`<button class="mini" data-act="brUndo" data-r="${r}" data-i="${i}">↩︎ отменить</button>`:''}</div>`}
+  ${m.mid&&(!nx||nx.w==null)&&Date.now()-((S.matches.find(x=>x.id===m.mid)||{}).ts||0)<UNDO_MS?`<button class="mini" ${CONFIRM==='b'+r+'_'+i?'style="background:#B9654A;color:#fff"':''} data-act="brUndo" data-r="${r}" data-i="${i}">${CONFIRM==='b'+r+'_'+i?'Удалить результат?':'Отменить'}</button>`:''}</div>`}
 function pastTours(){const l=S.tours.filter(x=>!x.open&&x.stage!=='setup').sort((a,b)=>b.ts-a.ts).slice(0,8);if(!l.length)return'';
   return`<div class="card list"><h3>Прошлые турниры</h3>${l.map(x=>`<div class="li" data-act="sumTour" data-id="${x.id}"><span class="grow">${esc(x.name)}<small>${fmtDate(x.ts)} · ${x.mode==='teams'?'команды':'каждый сам за себя'}</small></span><span>🏆 ${champ(x)}</span></div>`).join('')}</div>`}
 function champ(t){if(t.mode==='teams'){const f=t.br&&t.br[t.br.length-1][0];return f&&f.w!=null?teamName(t,f.w):'—'}const tb=soloTable(t);return tb[0]&&tb[0].g?esc(nm(tb[0].id)):'—'}
@@ -397,7 +398,7 @@ const A={
     const m={id:uid(),ts:Date.now(),ctx:{t:own,id:o.id},a:[...c.a],b:[...c.b],sa,sb,host:o.host||''};if(g)m.g=g;S.matches.push(m);
     if(c.bm){const[r,i]=c.bm,bm=o.br[r][i];bm.w=sa>sb?bm.a:bm.b;bm.mid=m.id;bm.sc=sa+':'+sb;adv(o,r,i)}
     o.cur=null;save();render()},
-  undo:e=>{S.matches=S.matches.filter(m=>m.id!==e.dataset.id);save();render()},
+  undo:e=>{if(CONFIRM!=='u'+e.dataset.id){askConfirm('u'+e.dataset.id);return}CONFIRM=null;S.matches=S.matches.filter(m=>m.id!==e.dataset.id);save();render()},
   endSession:()=>{const s=activeSession();s.open=false;s.cur=null;s.end=Date.now();save();
     if(!ctxMatches('s',s.id).length){S.sessions=S.sessions.filter(x=>x!==s);save();return render()}C=calc();openModal(()=>summaryHTML('s',s))},
   sumSession:e=>openModal(()=>summaryHTML('s',S.sessions.find(x=>x.id===e.dataset.id))),
@@ -414,7 +415,7 @@ const A={
   playBr:e=>{const t=activeTour(),r=+e.dataset.r,i=+e.dataset.i,m=t.br[r][i];
     t.cur={a:posAssign([...t.teams[m.a]]),b:posAssign([...t.teams[m.b]]),fixed:true,bm:[r,i],title:rn(r,t.br.length)};save();render();scrollTo(0,0)},
   closeBr:()=>{activeTour().cur=null;save();render()},
-  brUndo:e=>{const t=activeTour(),r=+e.dataset.r,i=+e.dataset.i,m=t.br[r][i];
+  brUndo:e=>{const t=activeTour(),r=+e.dataset.r,i=+e.dataset.i,m=t.br[r][i];if(CONFIRM!=='b'+r+'_'+i){askConfirm('b'+r+'_'+i);return}CONFIRM=null;
     if(r+1<t.br.length){const nx=t.br[r+1][i>>1];if(nx.w!=null)return;if(i%2===0)nx.a=null;else nx.b=null;if(t.cur&&t.cur.bm&&t.cur.bm[0]===r+1)t.cur=null}
     S.matches=S.matches.filter(x=>x.id!==m.mid);m.w=null;m.mid=null;m.sc=null;save();render()},
   moreGames:()=>{activeTour().G++;save();render()},

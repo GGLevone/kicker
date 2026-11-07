@@ -93,7 +93,7 @@ const blank=()=>({players:[],matches:[],sessions:[],tours:[]});
 const strip=o=>JSON.stringify(o,(k,v)=>k[0]==='_'?undefined:v);
 function load(){try{const t=localStorage.getItem(LS);if(t)return Object.assign(blank(),JSON.parse(t))}catch(e){}return blank()}
 function cacheLocal(){try{localStorage.setItem(LS,strip(S))}catch(e){}}
-let LOADED=!ONLINE,SNAP={},Q=[],FT=null,FLUSHING=false,SYNC='',NEEDRENDER=false;
+let ADMIN='',LOADED=!ONLINE,SNAP={},Q=[],FT=null,FLUSHING=false,SYNC='',NEEDRENDER=false;
 function snapAll(){SNAP={};COLLS.forEach(c=>{SNAP[c]={};S[c].forEach(o=>SNAP[c][o.id]=strip(o))})}
 function save(){cacheLocal();if(!ONLINE)return;
   COLLS.forEach(c=>{const seen={};SNAP[c]=SNAP[c]||{};
@@ -107,7 +107,7 @@ async function flush(){if(FLUSHING||!Q.length)return;FLUSHING=true;const ops=Q.s
   finally{FLUSHING=false;if(retry)setTimeout(flush,5000);else if(Q.length)flush()}}
 async function pull(force){if(!ONLINE||Q.length||FLUSHING)return;
   try{if(force)setSync('wait');const r=await fetch(API+'?action=state');const j=await r.json();if(!j.ok)throw 0;if(Q.length||FLUSHING)return;
-    const nd=Object.assign(blank(),j.data);
+    ADMIN=String(j.admin||'');const nd=Object.assign(blank(),j.data);
     const changed=COLLS.some(c=>nd[c].length!==Object.keys(SNAP[c]||{}).length||nd[c].some(o=>(SNAP[c]||{})[o.id]!==strip(o)));
     setSync('ok');const first=!LOADED;LOADED=true;if(!changed){if(first)render();return}S=nd;snapAll();cacheLocal();
     const ae=document.activeElement;if(!first&&(MODALFN||(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName)&&!force)))NEEDRENDER=true;else render()}
@@ -116,6 +116,8 @@ function setSync(s){SYNC=s;const el=document.getElementById('sync');if(el)el.tex
 function hashInit(){try{return new URLSearchParams((window.__H||'').slice(1)).get('tgWebAppData')||''}catch(e){return''}}
 const INITF=()=>(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)||hashInit();
 function TGU(){try{const u=new URLSearchParams(INITF()).get('user');return u?JSON.parse(u):null}catch(e){return null}}
+const isAdmin=()=>!ONLINE||!ADMIN||String((TGU()||{}).id)===ADMIN;
+const canEdit=p=>isAdmin()||!p.tg||String(p.tg)===String((TGU()||{}).id);
 const meP=()=>{const u=TGU();return u?S.players.find(p=>p.tg===u.id):null};
 let S=load(),TAB='rating',SEL=new Set(),SHOWG=true,TMODE='teams',FORM={tper:3,ppos:'any'},CONFIRM=null,MODALFN=null,C={R:{},st:{}};
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
@@ -318,7 +320,7 @@ function vPlayers(){const l=[...S.players].sort((a,b)=>(a.guest-b.guest)||a.name
 function vMore(){const json=JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);
   const u=TGU(),me=meP();
   return`<h2>Данные</h2><div class="card"><h3>${ONLINE?'Общая база':'Локальный режим'}</h3><p class="hint">${ONLINE?'Все данные хранятся в общей Google-таблице: любой хост вносит результаты, остальные видят их сразу (обновление каждые 15 секунд или кнопкой ⟳).':'API не подключён — данные хранятся только на этом устройстве.'}</p>
-  <p class="muted">${u?`Вы вошли как ${esc(u.first_name||'')}${me?' · профиль: '+esc(me.name):' · откройте свой профиль в рейтинге и нажмите «Это я»'}`:'Открыто не из Telegram'}</p></div>
+  <p class="muted">${u?`Ваш Telegram ID: <b>${u.id}</b>${ADMIN&&String(u.id)===ADMIN?' · <span class="tag">владелец</span>':''}<br>`:''}${u?`Вы вошли как ${esc(u.first_name||'')}${me?' · профиль: '+esc(me.name):' · откройте свой профиль в рейтинге и нажмите «Это я»'}`:'Открыто не из Telegram'}</p></div>
   <div class="card"><h3>Резервная копия</h3><textarea rows="4" readonly id="exp">${esc(json)}</textarea><button class="btn ghost" data-act="copyExp">📋 Скопировать</button></div>
   ${ONLINE?'':`<div class="card"><h3>Загрузить копию</h3><textarea rows="4" id="imp" placeholder="Вставьте сюда текст копии"></textarea><div class="err" id="err_imp"></div><button class="btn ghost" data-act="import">Загрузить</button></div>
   <div class="card"><h3>Попробовать на примере</h3><p class="hint">Добавит 7 игроков и 30 случайных игр, чтобы посмотреть рейтинг и профили.</p><button class="btn ghost" data-act="demo">Загрузить демо</button>
@@ -330,7 +332,7 @@ function profileHTML(id){const p=P(id),D=PMODE,s=SD(D)[id],l=D==='2'?lean(s):nul
   const ms=S.matches.filter(m=>(m.a.length===1)===solo&&(m.a.includes(id)||m.b.includes(id))).sort((a,b)=>b.ts-a.ts).slice(0,6);
   const v=[BASE,...s.hist],mn=Math.min(...v),mx=Math.max(...v),rg=mx-mn||1;
   const spark=v.length>1?`<svg viewBox="0 0 300 60" class="spark" preserveAspectRatio="none"><polyline points="${v.map((y,i)=>`${(i/(v.length-1)*300).toFixed(1)},${(56-(y-mn)/rg*52).toFixed(1)}`).join(' ')}" fill="none" stroke="#55708C" stroke-width="2"/></svg>`:'';
-  return`<div class="row between"><h2 style="margin:0">${esc(nm(id))}</h2><button class="mini" data-act="editPlayer" data-id="${id}">✏️</button></div>
+  return`<div class="row between"><h2 style="margin:0">${esc(nm(id))}</h2>${canEdit(p)?`<button class="mini" data-act="editPlayer" data-id="${id}">✏️</button>`:''}</div>
   ${(()=>{const u=TGU();if(!u)return'';if(p.tg===u.id)return'<p><span class="tag">это ваш профиль</span> <button class="mini" data-act="unme" data-id="'+id+'">отвязать</button></p>';if(!p.tg&&!meP())return'<button class="mini" data-act="itsme" data-id="'+id+'">🙋 Это я</button>';return''})()}
   <p class="muted">Любимая позиция: ${POS[p.pos||'any']}${p.guest?'<span class="tag">гость</span>':''}${p.note?'<br>'+esc(p.note):''}</p>
   <div class="seg"><button class="${!solo?'on':''}" data-act="pmode" data-m="2" data-id="${id}">2 на 2</button><button class="${solo?'on':''}" data-act="pmode" data-m="1" data-id="${id}">1 на 1</button></div>
@@ -349,7 +351,7 @@ function editHTML(id){const p=P(id),used=S.matches.some(m=>m.a.includes(id)||m.b
   <label>Любимая позиция<select id="ep_pos">${Object.entries(POS).map(([k,v])=>`<option value="${k}" ${p.pos===k?'selected':''}>${v}</option>`).join('')}</select></label>
   <label class="tog"><input type="checkbox" id="ep_g" ${p.guest?'checked':''}> Гость (снимите, чтобы сделать постоянным игроком)</label>
   <button class="btn" data-act="savePlayer" data-id="${id}">Сохранить</button>
-  ${used?'<p class="hint">У игрока есть игры, поэтому удалить нельзя. Можно оставить его гостем и скрыть гостей в рейтинге.</p>':`<button class="btn danger" data-act="delPlayer" data-id="${id}">Удалить</button>`}`}
+  ${!isAdmin()?'':used?'<p class="hint">У игрока есть игры, поэтому удалить его можно только в таблице.</p>':`<button class="btn danger" data-act="delPlayer" data-id="${id}">Удалить</button>`}`}
 function summaryHTML(kind,o){let txt,html;
   if(kind==='s'){const tb=ctxTable('s',o.id,o.ids).filter(x=>x.g).sort((x,y)=>y.d-x.d),m=mvp(tb);
     html=`<h2>Итоги вечера · ${fmtDate(o.ts)}</h2>${m?`<div class="banner">🏆 Лучший игрок вечера<b>${esc(nm(m.id))}</b>${m.w} побед из ${m.g} · рейтинг ${Math.round(m.d)>=0?'+':''}${Math.round(m.d)}<small style="margin-top:6px;font-style:italic">«${mvpPh(o)}»</small></div>`:''}${(()=>{const t=topScorer(tb);return t?`<p>⚽ Бомбардир вечера: <b>${esc(nm(t.id))}</b> — ${t.pg} гол(ов) за ${t.pgn} игр</p>`:''})()}${awardsHTML('s',o)}${tableHTML(tb,'Таблица')}`;

@@ -304,6 +304,11 @@ function vSession(){const s=activeSession();
     if(thOn){if(!s.cur||s.cur.kind!=='throne'||s.cur.step!==th.step){const T=s.throne;s.cur={a:posAssign([...T.champs]),b:posAssign([...T.pairs[th.step]]),kind:'throne',fixed:true,step:th.step};save()}}
     else{if(s.cur&&s.cur.kind==='throne')s.cur=null;
       if(!s.cur){const lm=ms[ms.length-1];s.cur=s.manual&&lm&&[...lm.a,...lm.b].every(i=>s.ids.includes(i))?{a:[...lm.a],b:[...lm.b]}:sessNext(s,ms);save()}}}
+  const ck=c=>c?[...c.a,'|',...c.b].join(','):'';let nextBox='';
+  if(s.ids.length>=4&&s.cur&&!s.manual&&!thOn){
+    if(!s.next||s.nextFor!==ck(s.cur)){s.next=sessNext(s,[...ms,{a:s.cur.a,b:s.cur.b,sa:10,sb:0,kind:s.cur.kind}]);if(s.next){delete s.next.sa;delete s.next.sb}s.nextFor=ck(s.cur);save()}
+    if(s.next){const tn=t=>t.map(i=>esc(nm(i))).join(' & ');nextBox=`<div class="card" style="padding:12px 14px"><span class="muted" style="font-size:13px">Следом${s.next.kind==='clasico'?' · ⚡ Эль Класико':''}</span><div style="font-weight:600;margin-top:2px">${tn(s.next.a)} <span class="muted" style="font-weight:400">vs</span> ${tn(s.next.b)}</div></div>`}}
+  else if(thOn&&th.step<2){const tn=t=>t.map(i=>esc(nm(i))).join(' & ');nextBox=`<div class="card" style="padding:12px 14px"><span class="muted" style="font-size:13px">Следом · 👑 трон</span><div style="font-weight:600;margin-top:2px">${tn(s.throne.champs)} <span class="muted" style="font-weight:400">vs</span> ${tn(s.throne.pairs[th.step+1])}</div></div>`}
   const thBox=thOn?`<div class="banner" style="background:#55708C">👑 Защита трона · игра ${th.step+1} из 3<b>${s.throne.champs.map(i=>esc(nm(i))).join(' & ')}</b>Банк: +${th.bank} каждому, кто свергнет чемпионов<br><button class="mini" style="margin-top:8px" data-act="throneAbort">${CONFIRM==='thr'?'Точно прервать?':'Прервать'}</button></div>`
     :throneCan(s,ms)?`<button class="btn ghost" data-act="throneOpen">👑 Защита трона</button>`:'';
   const edTitle=s.cur&&s.cur.kind==='throne'?`👑 Трон · игра ${th.step+1} из 3 · банк +${th.bank}`:s.cur&&s.cur.kind==='clasico'?'⚡ Эль Класико':s.manual?'Игра':'Следующая игра';
@@ -311,7 +316,7 @@ function vSession(){const s=activeSession();
   <p class="muted" style="margin-top:0">Хост: ${esc(s.host||'—')} · игроков: ${s.ids.length} · сыграно: ${ms.length}</p>
   <div class="seg"><button class="${s.manual?'':'on'}" data-act="smode" data-m="auto">🤖 Авто-подбор</button><button class="${s.manual?'on':''}" data-act="smode" data-m="manual">✋ Свои составы</button></div>
   <p class="hint" style="margin-top:0">${s.manual?'Выбирайте игроков в списках сами. После игры состав остаётся — удобно для реванша.':'Программа ставит в игру тех, кто дольше ждёт, меняет минимум троих и не даёт играть больше 2 игр подряд. Иногда выпадает ⚡ Эль Класико.'}</p>
-  ${thBox}${s.ids.length<2?'<div class="card">Нужно минимум 2 игрока — нажмите «+ Игрок».</div>':editorHTML('s',s,edTitle)}
+  ${thBox}${s.ids.length<2?'<div class="card">Нужно минимум 2 игрока — нажмите «+ Игрок».</div>':editorHTML('s',s,edTitle)+nextBox}
   ${tableHTML(ctxTable('s',s.id,s.ids).sort((x,y)=>y.d-x.d),'Таблица вечера')}${gamesList(ms,true)}
   <button class="btn danger" data-act="endSession">Завершить вечер</button>`}
 
@@ -471,7 +476,7 @@ const A={
   startSession:()=>{if(SEL.size<2)return err('err_new','Выберите хотя бы двух игроков');
     S.sessions.push({id:uid(),ts:Date.now(),host:(FORM.host||'').trim(),ids:[...SEL],open:true,cur:null});SEL.clear();save();render()},
   editRoster:()=>{const s=activeSession();SEL=new Set(s.ids);openModal(()=>`<h2>Кто играет</h2><p class="hint" style="margin-top:0">Отметьте, кто пришёл, или добавьте нового игрока. Тех, кто ушёл, можно снять — их игры сохранятся.</p>${chipsHTML()}<button class="btn" data-act="applyRoster">Готово · ${SEL.size} игроков</button>`)},
-  applyRoster:()=>{const s=activeSession(),L=ctxMatches('s',s.id).length;s.join=s.join||{};[...SEL].forEach(i=>{if(!s.ids.includes(i))s.join[i]=L});s.ids=[...SEL];if(!s.cur||![...s.cur.a,...s.cur.b].every(i=>s.ids.includes(i)))s.cur=null;SEL.clear();save();closeModal()},
+  applyRoster:()=>{const s=activeSession(),L=ctxMatches('s',s.id).length;s.join=s.join||{};[...SEL].forEach(i=>{if(!s.ids.includes(i))s.join[i]=L});s.ids=[...SEL];s.next=null;if(!s.cur||![...s.cur.a,...s.cur.b].every(i=>s.ids.includes(i)))s.cur=null;SEL.clear();save();closeModal()},
   regen:e=>{const o=getOwner(e.dataset.own);o.cur=pickNext(o.ids,ctxMatches(e.dataset.own,o.id),e.dataset.own==='s'?15:40);save();render()},
   swap:e=>{const o=getOwner(e.dataset.own);o.cur[e.dataset.k].reverse();save();render()},
   saveRes:e=>{const own=e.dataset.own,o=getOwner(own),c=o.cur,sa=parseInt(c.sa),sb=parseInt(c.sb),all=[...c.a,...c.b];
@@ -484,9 +489,11 @@ const A={
     if(c.kind==='throne'){const th=throneState(o,ctxMatches(own,o.id)),T=o.throne,ca=m.a.includes(T.champs[0]),won=ca?sa>sb:sb>sa,ch=ca?m.b:m.a;
       if(!won){m.bonus={};ch.forEach(i=>m.bonus[i]=th.bank)}else if(th.step===2){m.bonus={};T.champs.forEach(i=>m.bonus[i]=30)}}
     S.matches.push(m);
+    if(own==='s'){const nx=o.next,ok=nx&&o.nextFor===[...c.a,'|',...c.b].join(',')&&[...nx.a,...nx.b].every(i=>o.ids.includes(i));o.next=null;o.nextFor=null;
+      if(ok&&!o.manual&&c.kind!=='throne'){o.cur={a:nx.a,b:nx.b};if(nx.kind)o.cur.kind=nx.kind;save();return render()}}
     if(c.bm){const[r,i]=c.bm,bm=o.br[r][i];bm.w=sa>sb?bm.a:bm.b;bm.mid=m.id;bm.sc=sa+':'+sb;adv(o,r,i)}
     o.cur=null;save();render()},
-  undo:e=>{if(CONFIRM!=='u'+e.dataset.id){askConfirm('u'+e.dataset.id);return}CONFIRM=null;const ss=activeSession();if(ss&&TAB==='session')ss.cur=null;S.matches=S.matches.filter(m=>m.id!==e.dataset.id);save();render()},
+  undo:e=>{if(CONFIRM!=='u'+e.dataset.id){askConfirm('u'+e.dataset.id);return}CONFIRM=null;const ss=activeSession();if(ss&&TAB==='session'){ss.cur=null;ss.next=null}S.matches=S.matches.filter(m=>m.id!==e.dataset.id);save();render()},
   endSession:()=>{const s=activeSession();s.open=false;s.cur=null;s.end=Date.now();save();
     if(!ctxMatches('s',s.id).length){S.sessions=S.sessions.filter(x=>x!==s);save();return render()}C=calc();openModal(()=>summaryHTML('s',s))},
   sumSession:e=>openModal(()=>summaryHTML('s',S.sessions.find(x=>x.id===e.dataset.id))),

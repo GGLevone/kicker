@@ -90,12 +90,13 @@ td{padding:9px 4px;border-top:1px solid var(--line);text-align:right;font-weight
 .sbh{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}.sbh .blue{color:#8FA7BF}.sbh .red{color:#E7836F}
 .sbm{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
 .sbt.red{text-align:right}
-.sbp{background:#2A2C2F;border-radius:14px;padding:8px 10px 9px;margin-bottom:6px;border-left:3px solid #8FA7BF}.sbt.red .sbp{border-left:0;border-right:3px solid #E7836F}.sbr{display:block;font-size:9px;color:#8A8986;letter-spacing:.8px;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.sbp{background:#2A2C2F;border-radius:14px;padding:8px 10px 9px;margin-bottom:6px;}.sbr{display:block;font-size:9px;color:#8A8986;letter-spacing:.8px;font-weight:700;text-transform:uppercase;margin-bottom:2px}
 .sbs{-webkit-appearance:none;appearance:none;background:none;color:#fff;border:0;border-radius:0;padding:0;font-weight:700;font-size:15px;width:100%}.sbt.red .sbs{text-align:right;text-align-last:right}
 .sbp b{font-size:15px;display:block}
 .sbx{background:#2A2C2F;border:0;border-radius:999px;padding:5px 10px!important;color:#C9C7C2;font:inherit;font-size:11px;font-weight:600;padding:2px 0;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-.sbsc{display:flex;align-items:center;gap:6px;color:#6B6D70;font:500 22px var(--num)}
-.sbin{width:54px;height:64px;border-radius:14px;background:#2E3033;border:0;color:#fff;text-align:center;font:600 34px var(--num);padding:0}.sbin.blue{color:#8FA7BF}.sbin.red{color:#E7836F}.sbin::placeholder{color:#55585C;font:500 28px var(--num)}
+.sbsc{display:flex;align-items:center;gap:2px;color:#6B6D70;font:500 34px var(--num)}.sbp:last-child{margin-bottom:0}.sbf{display:flex;justify-content:space-between;margin-top:8px}
+input[type=number]{-moz-appearance:textfield}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.sbin{width:52px;height:64px;border-radius:0;background:none;border:0;color:#fff;text-align:center;font:600 48px var(--num);padding:0}.sbin.blue{color:#8FA7BF}.sbin.red{color:#E7836F}.sbin.blue::placeholder{color:#8FA7BF;opacity:.45;font:600 48px var(--num)}.sbin.red::placeholder{color:#E7836F;opacity:.45;font:600 48px var(--num)}
 .sbg{background:#3A3C40!important;color:#fff;margin-top:4px;width:60px}.sbt.red .sbg{margin-left:auto;display:block}
 .nx{margin:14px 0}.nxb{background:var(--card);border-radius:18px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
 .nxt{font-weight:700;font-size:14px}.nxt span{display:block;width:fit-content;max-width:100%;background:#fff;border-radius:10px;padding:5px 10px;margin:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nxt.red span{margin-left:auto}.nxt.red{text-align:right}.nxt.blue span{color:var(--blue)}.nxt.red span{color:var(--red)}
@@ -107,7 +108,7 @@ td{padding:9px 4px;border-top:1px solid var(--line);text-align:right;font-weight
  .tw{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;margin-top:8px}
  .tw .card{background:none;padding:6px 0}
  .rw{display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:start}.side{display:block}
- .sb{padding:22px 28px}.sbin{width:86px;height:92px;font-size:54px;border-radius:18px}.sbsc{font-size:30px;gap:10px}.sbs{font-size:18px}.sbp{padding:10px 14px 12px}.sbp b{font-size:18px}.sbh{font-size:12px}
+ .sb{padding:22px 28px}.sbin,.sbin.blue::placeholder,.sbin.red::placeholder{width:96px;height:96px;font-size:72px}.sbsc{font-size:48px;gap:6px}.sbs{font-size:18px}.sbp{padding:10px 14px 12px}.sbp b{font-size:18px}.sbh{font-size:12px}
  .sbm{gap:24px}
 }
 .tag{display:inline-block;font-size:11px;font-weight:700;background:var(--card);border-radius:8px;padding:2px 8px;margin-left:6px;color:var(--mu);vertical-align:middle}
@@ -314,11 +315,11 @@ function nxHTML(a,b,tag){const tn=(t,c)=>`<div class="nxt ${c}">${t.map(i=>`<spa
 function editorHTML(own,o,title){const c=o.cur;if(!c)return'';
   const Rm=RD(c.a.length===1?'1':'2'),ea=ex(avg(c.a.map(i=>Rm[i]??BASE)),avg(c.b.map(i=>Rm[i]??BASE))),pa=Math.round(ea*100);
   const side=(k,cls)=>{const t=c[k];return`<div class="sbt ${cls}">${t.map((id,j)=>`<div class="sbp"><span class="sbr">${t.length===2?(j===0?'Атака':'Защита'):'1 на 1'}</span>${c.fixed?`<b>${esc(nm(id))}</b>`:`<select class="sbs" data-chg="setpos" data-own="${own}" data-k="${k}" data-j="${j}">${o.ids.map(i=>`<option value="${i}" ${i===id?'selected':''}>${esc(nm(i))}</option>`).join('')}</select>`}${o.pg?`<input class="pgi sbg" type="number" inputmode="numeric" min="0" data-pg="${id}" data-own="${own}" value="${esc((c.g||{})[id])}" placeholder="голы">`:''}</div>`).join('')}
-    ${t.length===2?`<button class="sbx" data-act="swap" data-own="${own}" data-k="${k}">${ic('swap',13)} позиции</button>`:''}</div>`};
+</div>`};const sw=k=>c[k].length===2?`<button class="sbx" data-act="swap" data-own="${own}" data-k="${k}">${ic('swap',13)} позиции</button>`:'<span></span>';
   const on=new Set([...c.a,...c.b]),rest=c.fixed?[]:o.ids.filter(i=>!on.has(i));
   return`<div class="sbttl">${title}</div>
   <div class="sb"><div class="sbh"><span class="blue">Синие · ${pa}%</span><span class="red">${100-pa}% · Красные</span></div>
-  <div class="sbm">${side('a','blue')}<div class="sbsc"><input class="sbin blue" type="number" inputmode="numeric" min="0" data-sc="a" data-own="${own}" value="${esc(c.sa)}" placeholder="–"><span>:</span><input class="sbin red" type="number" inputmode="numeric" min="0" data-sc="b" data-own="${own}" value="${esc(c.sb)}" placeholder="–"></div>${side('b','red')}</div></div>
+  <div class="sbm">${side('a','blue')}<div class="sbsc"><input class="sbin blue" type="number" inputmode="numeric" min="0" data-sc="a" data-own="${own}" value="${esc(c.sa)}" placeholder="0"><span>:</span><input class="sbin red" type="number" inputmode="numeric" min="0" data-sc="b" data-own="${own}" value="${esc(c.sb)}" placeholder="0"></div>${side('b','red')}</div>${sw('a')||sw('b')?`<div class="sbf">${sw('a')}${sw('b')}</div>`:''}</div>
   <div class="row" style="margin-top:10px;flex-wrap:wrap;gap:6px"><button class="mini" data-act="togpg" data-own="${own}">Голы: ${o.pg?'вкл':'выкл'}</button>${!c.fixed&&o.ids.length>=4?`<button class="mini" data-act="fmt" data-own="${own}">${c.a.length===2?'1 на 1':'2 на 2'}</button>`:''}<span class="grow"></span><span style="display:inline-flex;align-items:center;gap:6px"><span class="muted">до</span><select data-chg="setto" data-own="${own}" style="width:auto;background:var(--card);border-color:transparent;font-weight:700">${[10,8,7,6,5,3].map(n=>`<option ${+(o.to||10)===n?'selected':''}>${n}</option>`).join('')}</select></span>${qm('Введите голы проигравших — победителям счёт поставится сам. Можно вписать любой счёт вручную.')}</div>
   <div class="err" id="err_${own}"></div><button class="btn" data-act="saveRes" data-own="${own}">Сохранить результат</button>
   ${c.bm?'<button class="btn ghost" data-act="closeBr">Отмена</button>':''}`}

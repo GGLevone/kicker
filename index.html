@@ -83,6 +83,8 @@ td{padding:9px 4px;border-top:1px solid var(--line);text-align:right;font-weight
 .modal{position:fixed;inset:0;background:rgba(30,31,33,.35);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .modal.hidden{display:none}
 .sheet{background:var(--bg);width:100%;max-width:720px;max-height:88vh;overflow:auto;border-radius:28px 28px 0 0;padding:20px 18px 30px}
+.qm{width:26px;height:26px;border-radius:50%;border:0;background:var(--card);color:var(--mu);font:700 13px Manrope,sans-serif;cursor:pointer;flex:none;padding:0;margin-left:8px;vertical-align:middle}
+.card .qm{background:#FFFFFF}.seg .qm{border-bottom:0;margin:0 0 6px auto;align-self:center;padding:0;color:var(--mu);background:var(--card);border-radius:50%}h2 .qm{transform:translateY(-4px)}
 .tag{display:inline-block;font-size:11px;font-weight:700;background:var(--card);border-radius:8px;padding:2px 8px;margin-left:6px;color:var(--mu);vertical-align:middle}
 .empty{text-align:center;color:var(--mu);padding:48px 10px}.empty b{color:var(--ink);font:600 22px var(--num);text-transform:uppercase}
 </style>
@@ -145,6 +147,7 @@ const sg=d=>`<span class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${Math.round(d)}</s
 const fmtDate=ts=>new Date(ts).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 const IP={crown:'<path d="M4 19h16M5 8l4 4 3-6 3 6 4-4-1.5 10.5h-11z"/>',bolt:'<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4.5V11h-6.5"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>',pencil:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',swap:'<path d="M7 4v16M4 7l3-3 3 3M17 20V4M14 17l3 3 3-3"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.5 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'};
 const ic=(n,sz)=>`<svg viewBox="0 0 24 24" width="${sz||18}" height="${sz||18}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n]}</svg>`;
+const HELP={};let HID=0;const qm=t=>{const k='h'+(HID++);HELP[k]=t;return`<button class="qm" data-act="help" data-k="${k}" aria-label="Подсказка">?</button>`};
 const evI=(n,t)=>`<span class="ev"><i>${ic(n,15)}</i>${t}</span>`;
 const POS={any:'Универсал',atk:'Атака',def:'Защита'};
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -172,8 +175,9 @@ function calc(){
 }
 const UNDO_MS=15*60*1000;let CT=null;function askConfirm(k){CONFIRM=k;render();clearTimeout(CT);CT=setTimeout(()=>{if(CONFIRM===k){CONFIRM=null;render()}},4000)}
 const RD=d=>d==='1'?C.R1:C.R, SD=d=>d==='1'?C.st1:C.st;
-let RMODE='2',PMODE='2';
-function lean(s){if(!s)return null;const a=s.ag>=2?s.aw/s.ag:null,d=s.dg>=2?s.dw/s.dg:null;
+let RMODE='2',PMODE='2',HELPBACK=null;
+function lean(s,pos){if(!s)return null;const a=s.ag>=2?s.aw/s.ag:null,d=s.dg>=2?s.dw/s.dg:null;
+  if(pos==='any'||!pos){if(a==null||d==null||Math.abs(a-d)<.1)return{i:'',t:'Универсал'};return a>d?{i:'',t:'Универсал · сильнее в атаке'}:{i:'',t:'Универсал · сильнее в защите'}}
   if(a==null&&d==null)return null;if(d==null)return{i:'',t:'Играет в атаке'};if(a==null)return{i:'',t:'Играет в защите'};
   if(Math.abs(a-d)<.1)return{i:'',t:'Универсал: одинаково в атаке и защите'};
   return a>d?{i:'',t:'Сильнее в атаке'}:{i:'',t:'Сильнее в защите'}}
@@ -290,8 +294,8 @@ function editorHTML(own,o,title){const c=o.cur;if(!c)return'';
   return`<div class="card"><h3>${title}</h3>
   <div class="match">${team('a','Синие','blue')}<div class="vs">vs</div>${team('b','Красные','red')}</div>
   ${rest.length?`<p class="muted" style="margin:10px 0 0">Отдыхают: ${rest.map(i=>esc(nm(i))).join(', ')}</p>`:''}
-  <div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="mini" data-act="togpg" data-own="${own}">Голы игроков: ${o.pg?'вкл':'выкл'}</button>${!c.fixed&&o.ids.length>=4?`<button class="mini" data-act="fmt" data-own="${own}">${c.a.length===2?'→ 1 на 1':'→ 2 на 2'}</button>`:''}</div><div class="row" style="margin-top:8px"><span class="muted">Игра до</span><select data-chg="setto" data-own="${own}" style="width:auto">${[10,8,7,6,5,3].map(n=>`<option ${+(o.to||10)===n?'selected':''}>${n}</option>`).join('')}</select></div>
-  <p class="hint" style="margin:6px 0 0">Введите голы проигравших — победителям счёт поставится сам. Можно вписать любой счёт вручную.</p><div class="err" id="err_${own}"></div><button class="btn" data-act="saveRes" data-own="${own}">Сохранить результат</button>
+  <div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="mini" data-act="togpg" data-own="${own}">Голы игроков: ${o.pg?'вкл':'выкл'}</button>${!c.fixed&&o.ids.length>=4?`<button class="mini" data-act="fmt" data-own="${own}">${c.a.length===2?'→ 1 на 1':'→ 2 на 2'}</button>`:''}</div><div class="row" style="margin-top:8px"><span class="muted">Игра до</span><select data-chg="setto" data-own="${own}" style="width:auto">${[10,8,7,6,5,3].map(n=>`<option ${+(o.to||10)===n?'selected':''}>${n}</option>`).join('')}</select>${qm('Введите голы проигравших — победителям счёт поставится сам. Можно вписать любой счёт вручную.')}</div>
+<div class="err" id="err_${own}"></div><button class="btn" data-act="saveRes" data-own="${own}">Сохранить результат</button>
   ${c.bm?'<button class="btn ghost" data-act="closeBr">Отмена</button>':''}</div>`}
 function tableHTML(tb,title){if(!tb.some(x=>x.g))return'';const G=tb.some(x=>x.pgn);return`<div class="card"><h3>${title}</h3><table><tr><th>Игрок</th><th>Игр</th><th>Побед</th>${G?'<th>Голы</th>':''}<th>Голы ±</th><th>Рейтинг</th></tr>
   ${tb.map(x=>`<tr><td>${esc(nm(x.id))}</td><td>${x.g}</td><td>${x.w}</td>${G?`<td>${x.pgn?x.pg:'—'}</td>`:''}<td>${x.gd>0?'+':''}${x.gd}</td><td>${sg(x.d)}</td></tr>`).join('')}</table></div>`}
@@ -306,7 +310,7 @@ function gamesList(ms,undo){if(!ms.length)return'';const l=[...ms].reverse();
 function vRating(){
   const Rm=RD(RMODE),Sm=SD(RMODE);const list=S.players.filter(p=>(SHOWG||!p.guest)&&(RMODE==='2'||Sm[p.id].g)).map(p=>({p,r:Rm[p.id],s:Sm[p.id]})).sort((x,y)=>y.r-x.r);
   if(!S.players.length)return empty('Пока нет игроков',ONLINE?'Добавьте их во вкладке «Игроки».':'Добавьте их во вкладке «Игроки» или загрузите демо в настройках.');
-  return`<div class="row between"><h2>Рейтинг</h2><label class="tog"><input type="checkbox" data-chg="showg" ${SHOWG?'checked':''}> гости</label></div>
+  return`<div class="row between"><h2>Рейтинг${qm('Рейтинг по системе Эло: старт 1000, за победу над сильными и за разгромный счёт даётся больше. Серым — меньше 3 игр (калибровка).')}</h2><label class="tog"><input type="checkbox" data-chg="showg" ${SHOWG?'checked':''}> гости</label></div>
   <div class="seg"><button class="${RMODE==='2'?'on':''}" data-act="rmode" data-m="2">2 на 2</button><button class="${RMODE==='1'?'on':''}" data-act="rmode" data-m="1">1 на 1</button></div>
   ${list.length?'':'<p class="hint">В этой дисциплине ещё нет игр.</p>'}
   ${list.length?(()=>{const x=list[0],w=x.s.g?Math.round(100*x.s.w/x.s.g):0;return`<div class="lead" data-act="profile" data-id="${x.p.id}"><div class="grow"><div style="font-size:12px;color:#9D9C98;font-weight:600">ЛИДЕР</div><div class="nm">${esc(nm(x.p.id))}</div><div class="lrt">${Math.round(x.r)}</div></div>
@@ -314,12 +318,12 @@ function vRating(){
   ${list.length>1?`<div class="card list">${list.slice(1).map((x,k)=>{const i=k+1;return`<div class="li" data-act="profile" data-id="${x.p.id}">
    <span class="rank ${i===1?'top0':''}">${String(i+1).padStart(2,'0')}</span><span class="grow">${esc(nm(x.p.id))}${gtag(x.p.id)}${TGU()&&x.p.tg===TGU().id?' <span class="tag">вы</span>':''}<small>${x.s.g} игр · ${pct(x.s.w,x.s.g)} побед</small></span>
    <b class="${x.s.g<3?'muted':''}">${Math.round(x.r)}</b></div>`}).join('')}</div>`:''}
-  <p class="hint">Рейтинг по системе Эло: старт 1000, за победу над сильными и за разгромный счёт даётся больше. Серым — меньше 3 игр (калибровка).</p>`}
+`}
 
 function activeSession(){return S.sessions.find(s=>s.open)}
 function vSession(){const s=activeSession();
   if(!s){const past=S.sessions.filter(x=>!x.open).sort((a,b)=>b.ts-a.ts).slice(0,8);
-    return`<h2>Игровой вечер</h2><p class="hint">Свободная игра: программа сама подбирает равные пары и следит, чтобы все отдыхали по очереди.</p>
+    return`<h2>Игровой вечер${qm('Свободная игра: программа сама подбирает равные пары и следит, чтобы все играли по очереди.')}</h2>
     <div class="card">${hostField()}<h3>Кто сегодня играет?</h3>${chipsHTML()}<div class="err" id="err_new"></div>
     <button class="btn" data-act="startSession">Начать вечер (${SEL.size})</button></div>
     ${past.length?`<div class="card list"><h3>Прошлые вечера</h3>${past.map(x=>{const m=mvp(ctxTable('s',x.id,x.ids));return`<div class="li" data-act="sumSession" data-id="${x.id}"><span class="grow">${fmtDate(x.ts)}<small>Хост: ${esc(x.host||'—')} · игр: ${ctxMatches('s',x.id).length}</small></span>${m?`<span style="font-weight:700">${esc(nm(m.id))}</span>`:''}</div>`}).join('')}</div>`:''}`}
@@ -337,10 +341,10 @@ function vSession(){const s=activeSession();
   const thBox=thOn?`<div class="banner">${evI('crown','Защита трона · игра '+(th.step+1)+' из 3')}<b>${s.throne.champs.map(i=>esc(nm(i))).join(' & ')}</b>Банк: +${th.bank} каждому, кто свергнет чемпионов<br><button class="mini" style="margin-top:8px" data-act="throneAbort">${CONFIRM==='thr'?'Точно прервать?':'Прервать'}</button></div>`
     :throneCan(s,ms)?`<button class="btn dark" data-act="throneOpen"><span class="ev">${ic('crown',18)} Защита трона</span></button>`:'';
   const edTitle=s.cur&&s.cur.kind==='throne'?evI('crown',`Трон · игра ${th.step+1} из 3 · банк +${th.bank}`):s.cur&&s.cur.kind==='clasico'?evI('bolt','Эль Класико'):s.manual?'Игра':'Следующая игра';
-  return`<div class="row between"><h2>Вечер · ${fmtDate(s.ts)}</h2><button class="mini" data-act="editRoster">+ Игрок</button></div>
-  <p class="muted" style="margin-top:0">Хост: ${esc(s.host||'—')} · игроков: ${s.ids.length} · сыграно: ${ms.length}</p>
-  <div class="seg"><button class="${s.manual?'':'on'}" data-act="smode" data-m="auto">Авто-подбор</button><button class="${s.manual?'on':''}" data-act="smode" data-m="manual">Свои составы</button></div>
-  <p class="hint" style="margin-top:0">${s.manual?'Выбирайте игроков в списках сами. После игры состав остаётся — удобно для реванша.':'Программа ставит в игру тех, кто дольше ждёт, меняет минимум троих и не даёт играть больше 2 игр подряд. Иногда выпадает Эль Класико.'}</p>
+  return`<div class="row between"><h2>Вечер</h2><button class="mini" data-act="editRoster">+ Игрок</button></div>
+  <p class="muted" style="margin-top:0">${fmtDate(s.ts)} · хост: ${esc(s.host||'—')} · игроков: ${s.ids.length} · сыграно: ${ms.length}</p>
+  <div class="seg"><button class="${s.manual?'':'on'}" data-act="smode" data-m="auto">Авто-подбор</button><button class="${s.manual?'on':''}" data-act="smode" data-m="manual">Свои составы</button>${qm(s.manual?'Выбирайте игроков в списках сами. После игры состав остаётся — удобно для реванша.':'Программа ставит в игру тех, кто дольше ждёт, меняет минимум троих и не даёт играть больше 2 игр подряд. Иногда выпадает Эль Класико.')}</div>
+
   ${thBox}${s.ids.length<2?'<div class="card">Нужно минимум 2 игрока — нажмите «+ Игрок».</div>':editorHTML('s',s,edTitle)+nextBox}
   ${tableHTML(ctxTable('s',s.id,s.ids).sort((x,y)=>y.d-x.d),'Таблица вечера')}${gamesList(ms,true)}
   <button class="btn danger" data-act="endSession">Завершить вечер</button>`}
@@ -351,12 +355,12 @@ const teamR=tm=>Math.round(avg(tm.map(i=>C.R[i]??BASE)));
 const rn=(r,n)=>{const l=n-r;return l===1?'Финал':l===2?'Полуфинал':l===3?'1/4 финала':l===4?'1/8 финала':'Раунд '+(r+1)};
 function vTour(){const t=activeTour();
   if(!t)return`<h2>Турнир</h2><div class="card"><label>Название<input data-f="tname" value="${esc(FORM.tname)}" placeholder="Турнир ${fmtDate(Date.now())}"></label>${hostField()}
-    <h3>Формат</h3><div class="seg"><button class="${TMODE==='teams'?'on':''}" data-act="tmode" data-m="teams">Команды · сетка</button><button class="${TMODE==='solo'?'on':''}" data-act="tmode" data-m="solo">Каждый сам за себя</button></div>
-    <p class="hint">${TMODE==='teams'?'Постоянные пары 2×2, сетка на выбывание. Пары собираются по рейтингу (сильный + слабый), случайно или вручную. Нужно чётное число игроков.':'Подходит для любого числа игроков, в том числе 5 или 7. В каждой игре новые напарники, очки личные. Побеждает тот, у кого больше побед.'}</p>
+    <h3>Формат${qm(TMODE==='teams'?'Постоянные пары 2×2, сетка на выбывание. Пары собираются по рейтингу (сильный + слабый), случайно или вручную. Нужно чётное число игроков.':'Подходит для любого числа игроков, в том числе 5 или 7. В каждой игре новые напарники, очки личные. Побеждает тот, у кого больше побед.')}</h3><div class="seg"><button class="${TMODE==='teams'?'on':''}" data-act="tmode" data-m="teams">Команды · сетка</button><button class="${TMODE==='solo'?'on':''}" data-act="tmode" data-m="solo">Каждый сам за себя</button></div>
+
     ${TMODE==='solo'?`<label>Игр на каждого (примерно)<input type="number" min="1" data-f="tper" value="${esc(FORM.tper)}"></label>`:''}
     <h3>Участники</h3>${chipsHTML()}<div class="err" id="err_new"></div><button class="btn" data-act="createTour">Далее (${SEL.size})</button></div>
     ${pastTours()}`;
-  if(t.stage==='setup')return`<h2>${esc(t.name)} · пары</h2><p class="hint">Проверьте пары или соберите заново. Сильнейшие пары по рейтингу получают проход, если команд не хватает для полной сетки.</p>
+  if(t.stage==='setup')return`<h2>${esc(t.name)} · пары${qm('Проверьте пары или соберите заново. Сильнейшие пары по рейтингу получают проход, если команд не хватает для полной сетки.')}</h2>
     <div class="row"><button class="mini" data-act="autoTeams" data-m="r">По рейтингу</button><button class="mini" data-act="autoTeams" data-m="x">Случайно</button></div>
     ${t.teams.map((tm,ti)=>`<div class="card"><div class="row between"><h3>Команда ${ti+1}</h3><span class="muted">${teamR(tm)}</span></div><div class="row">${tm.map((id,j)=>`<select data-chg="setteam" data-ti="${ti}" data-j="${j}">${t.ids.map(i=>`<option value="${i}" ${i===id?'selected':''}>${esc(nm(i))}</option>`).join('')}</select>`).join('')}</div></div>`).join('')}
     <button class="btn" data-act="launch">Запустить сетку</button><button class="btn ghost" data-act="cancelTour">Отменить турнир</button>`;
@@ -396,7 +400,7 @@ function vMore(){const json=JSON.stringify(S,(k,v)=>k[0]==='_'?undefined:v);
   <div class="card"><h3>Попробовать на примере</h3><p class="hint">Добавит 7 игроков и 30 случайных игр, чтобы посмотреть рейтинг и профили.</p><button class="btn ghost" data-act="demo">Загрузить демо</button>
   <button class="btn danger" data-act="reset">${CONFIRM==='reset'?'Точно удалить всё? Нажмите ещё раз':'Удалить все данные'}</button></div>`}`}
 
-function profileHTML(id){const p=P(id),D=PMODE,s=SD(D)[id],l=D==='2'?lean(s):null,solo=D==='1';
+function profileHTML(id){const p=P(id),D=PMODE,s=SD(D)[id],l=D==='2'?lean(s,p.pos):null,solo=D==='1';
   const parts=Object.entries(s.part).map(([pid,x])=>({pid,...x}));
   const bp=parts.filter(x=>x.g>=2).sort((a,b)=>b.w/b.g-a.w/a.g||b.g-a.g)[0],fp=[...parts].sort((a,b)=>b.g-a.g)[0];
   const ms=S.matches.filter(m=>(m.a.length===1)===solo&&(m.a.includes(id)||m.b.includes(id))).sort((a,b)=>b.ts-a.ts).slice(0,6);
@@ -501,7 +505,7 @@ const A={
   quickAdd:e=>{const n=(FORM.qname||'').trim();if(!n)return;const p=addP(n,e.dataset.g==='1');SEL.add(p.id);FORM.qname='';save();refresh()},
   startSession:()=>{if(SEL.size<2)return err('err_new','Выберите хотя бы двух игроков');
     S.sessions.push({id:uid(),ts:Date.now(),host:(FORM.host||'').trim(),ids:[...SEL],open:true,cur:null});SEL.clear();save();render()},
-  editRoster:()=>{const s=activeSession();SEL=new Set(s.ids);openModal(()=>`<h2>Кто играет</h2><p class="hint" style="margin-top:0">Отметьте, кто пришёл, или добавьте нового игрока. Тех, кто ушёл, можно снять — их игры сохранятся.</p>${chipsHTML()}<button class="btn" data-act="applyRoster">Готово · ${SEL.size} игроков</button>`)},
+  editRoster:()=>{const s=activeSession();SEL=new Set(s.ids);openModal(()=>`<h2>Кто играет${qm('Отметьте, кто пришёл, или добавьте нового игрока. Тех, кто ушёл, можно снять — их игры сохранятся.')}</h2>${chipsHTML()}<button class="btn" data-act="applyRoster">Готово · ${SEL.size} игроков</button>`)},
   applyRoster:()=>{const s=activeSession(),L=ctxMatches('s',s.id).length;s.join=s.join||{};[...SEL].forEach(i=>{if(!s.ids.includes(i))s.join[i]=L});s.ids=[...SEL];s.next=null;if(!s.cur||![...s.cur.a,...s.cur.b].every(i=>s.ids.includes(i)))s.cur=null;SEL.clear();save();closeModal()},
   regen:e=>{const o=getOwner(e.dataset.own);o.cur=pickNext(o.ids,ctxMatches(e.dataset.own,o.id),e.dataset.own==='s'?15:40);save();render()},
   swap:e=>{const o=getOwner(e.dataset.own);o.cur[e.dataset.k].reverse();save();render()},
@@ -552,6 +556,8 @@ const A={
     p.note=document.getElementById('ep_note').value.trim();p.pos=document.getElementById('ep_pos').value;p.guest=document.getElementById('ep_g').checked;save();closeModal()},
   delPlayer:e=>{S.players=S.players.filter(p=>p.id!==e.dataset.id);save();closeModal()},
   closeModal:()=>closeModal(),
+  help:e=>{const t=HELP[e.dataset.k]||'';const prev=MODALFN;HELPBACK=prev;openModal(()=>`<p style="font-size:16px;line-height:1.55">${t}</p><button class="btn dark" data-act="helpBack">Понятно</button>`)},
+  helpBack:()=>{const b=HELPBACK;HELPBACK=null;if(b)openModal(b);else closeModal()},
   throneOpen:()=>{const s=activeSession(),T=throneSetup(s),pn=t=>t.map(i=>esc(nm(i))).join(' & ');
     openModal(()=>`<h2>Защита трона</h2><p class="hint" style="margin-top:0">Два лучших игрока вечера защищают трон до 3 игр подряд. Соперники идут от слабой пары к сильной. Банк растёт: +10, +20, +30 — его получает каждый, кто свергнет чемпионов. Если чемпионы выиграют все 3 игры, каждый из них получит +30 и звание «Короли вечера». Доступно один раз за вечер.</p>
     <div class="banner">Чемпионы<b>${pn(T.champs)}</b></div>

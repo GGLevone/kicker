@@ -85,6 +85,31 @@ td{padding:9px 4px;border-top:1px solid var(--line);text-align:right;font-weight
 .sheet{background:var(--bg);width:100%;max-width:720px;max-height:88vh;overflow:auto;border-radius:28px 28px 0 0;padding:20px 18px 30px}
 .qm{width:26px;height:26px;border-radius:50%;border:0;background:var(--card);color:var(--mu);font:700 13px Manrope,sans-serif;cursor:pointer;flex:none;padding:0;margin-left:8px;vertical-align:middle}
 .card .qm{background:#FFFFFF}.seg .qm{border-bottom:0;margin:0 0 6px auto;align-self:center;padding:0;color:var(--mu);background:var(--card);border-radius:50%}h2 .qm{transform:translateY(-4px)}
+.sbttl{font-weight:700;font-size:15px;margin:16px 2px 0;display:flex;align-items:center;gap:6px}
+.sb{background:var(--ink);border-radius:24px;padding:14px;color:#fff;margin:8px 0}
+.sbh{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}.sbh .blue{color:#8FA7BF}.sbh .red{color:#E7836F}
+.sbm{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+.sbt.red{text-align:right}
+.sbp{background:#2A2C2F;border-radius:14px;padding:8px 10px 9px;margin-bottom:6px;border-left:3px solid #8FA7BF}.sbt.red .sbp{border-left:0;border-right:3px solid #E7836F}.sbr{display:block;font-size:9px;color:#8A8986;letter-spacing:.8px;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.sbs{-webkit-appearance:none;appearance:none;background:none;color:#fff;border:0;border-radius:0;padding:0;font-weight:700;font-size:15px;width:100%}.sbt.red .sbs{text-align:right;text-align-last:right}
+.sbp b{font-size:15px;display:block}
+.sbx{background:#2A2C2F;border:0;border-radius:999px;padding:5px 10px!important;color:#C9C7C2;font:inherit;font-size:11px;font-weight:600;padding:2px 0;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.sbsc{display:flex;align-items:center;gap:6px;color:#6B6D70;font:500 22px var(--num)}
+.sbin{width:54px;height:64px;border-radius:14px;background:#2E3033;border:0;color:#fff;text-align:center;font:600 34px var(--num);padding:0}.sbin.blue{color:#8FA7BF}.sbin.red{color:#E7836F}.sbin::placeholder{color:#55585C;font:500 28px var(--num)}
+.sbg{background:#3A3C40!important;color:#fff;margin-top:4px;width:60px}.sbt.red .sbg{margin-left:auto;display:block}
+.nx{margin:14px 0}.nxb{background:var(--card);border-radius:18px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+.nxt{font-weight:700;font-size:14px}.nxt span{display:block;width:fit-content;max-width:100%;background:#fff;border-radius:10px;padding:5px 10px;margin:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nxt.red span{margin-left:auto}.nxt.red{text-align:right}.nxt.blue span{color:var(--blue)}.nxt.red span{color:var(--red)}
+.nxs{display:flex;gap:4px;align-items:center;color:var(--mu);font:500 16px var(--num)}.nxs i{font-style:normal;width:30px;height:36px;border-radius:9px;background:#fff;display:grid;place-items:center;color:#C9C6BF;font-size:18px}
+.cap{font-size:11px;letter-spacing:.6px;color:var(--mu);font-weight:700;text-transform:uppercase;margin:0 0 6px}
+.tw,.rw{display:block}.side{display:none}
+@media(min-width:900px){
+ main{max-width:1080px}header{max-width:1080px;margin:0 auto;padding-left:16px;padding-right:16px}
+ .tw{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;margin-top:8px}
+ .tw .card{background:none;padding:6px 0}
+ .rw{display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:start}.side{display:block}
+ .sb{padding:22px 28px}.sbin{width:86px;height:92px;font-size:54px;border-radius:18px}.sbsc{font-size:30px;gap:10px}.sbs{font-size:18px}.sbp{padding:10px 14px 12px}.sbp b{font-size:18px}.sbh{font-size:12px}
+ .sbm{gap:24px}
+}
 .tag{display:inline-block;font-size:11px;font-weight:700;background:var(--card);border-radius:8px;padding:2px 8px;margin-left:6px;color:var(--mu);vertical-align:middle}
 .empty{text-align:center;color:var(--mu);padding:48px 10px}.empty b{color:var(--ink);font:600 22px var(--num);text-transform:uppercase}
 </style>
@@ -284,19 +309,19 @@ function hostField(){if(FORM.host===undefined){const m=meP(),u=TGU();FORM.host=m
 function chipsHTML(){const l=[...S.players].sort((a,b)=>(a.guest-b.guest)||a.name.localeCompare(b.name));
   return(l.length?`<div class="chips">${l.map(p=>`<button class="chip ${SEL.has(p.id)?'on':''}" data-act="chip" data-id="${p.id}">${esc(nm(p.id))}${p.guest?'<small>гость</small>':''}</button>`).join('')}</div>`:'<p class="hint">Игроков пока нет — добавьте ниже.</p>')
   +`<div class="row"><input data-f="qname" placeholder="Имя" value="${esc(FORM.qname)}"><button class="mini" data-act="quickAdd" data-g="0">+ Добавить</button><button class="mini" data-act="quickAdd" data-g="1">+ Гость</button></div>`}
+function nxHTML(a,b,tag){const tn=(t,c)=>`<div class="nxt ${c}">${t.map(i=>`<span>${esc(nm(i))}</span>`).join('')}</div>`;
+  return`<div class="nx"><p class="cap">Следующая игра${tag?' · '+tag:''}</p><div class="nxb">${tn(a,'blue')}<div class="nxs"><i>–</i>:<i>–</i></div>${tn(b,'red')}</div></div>`}
 function editorHTML(own,o,title){const c=o.cur;if(!c)return'';
-  const Rm=RD(c.a.length===1?'1':'2'),ea=ex(avg(c.a.map(i=>Rm[i]??BASE)),avg(c.b.map(i=>Rm[i]??BASE)));
-  const team=(k,label,cls)=>{const t=c[k];return`<div class="team ${cls}"><div class="tl">${label}<span class="chance">${Math.round((k==='a'?ea:1-ea)*100)}%</span></div>
-    ${t.map((id,j)=>`<div class="pl"><span class="role">${t.length===2?(j===0?'Атака':'Защита'):'1 на 1'}</span><div class="row">${c.fixed?`<b class="grow">${esc(nm(id))}</b>`:`<select data-chg="setpos" data-own="${own}" data-k="${k}" data-j="${j}">${o.ids.map(i=>`<option value="${i}" ${i===id?'selected':''}>${esc(nm(i))}</option>`).join('')}</select>`}${o.pg?`<input class="pgi" type="number" inputmode="numeric" min="0" data-pg="${id}" data-own="${own}" value="${esc((c.g||{})[id])}" placeholder="⚽">`:''}</div></div>`).join('')}
-    ${t.length===2?`<button class="mini" data-act="swap" data-own="${own}" data-k="${k}">${ic('swap',15)} Позиции</button>`:''}
-    <input class="score" type="number" inputmode="numeric" min="0" data-sc="${k}" data-own="${own}" value="${esc(c['s'+k])}" placeholder="голы"></div>`};
+  const Rm=RD(c.a.length===1?'1':'2'),ea=ex(avg(c.a.map(i=>Rm[i]??BASE)),avg(c.b.map(i=>Rm[i]??BASE))),pa=Math.round(ea*100);
+  const side=(k,cls)=>{const t=c[k];return`<div class="sbt ${cls}">${t.map((id,j)=>`<div class="sbp"><span class="sbr">${t.length===2?(j===0?'Атака':'Защита'):'1 на 1'}</span>${c.fixed?`<b>${esc(nm(id))}</b>`:`<select class="sbs" data-chg="setpos" data-own="${own}" data-k="${k}" data-j="${j}">${o.ids.map(i=>`<option value="${i}" ${i===id?'selected':''}>${esc(nm(i))}</option>`).join('')}</select>`}${o.pg?`<input class="pgi sbg" type="number" inputmode="numeric" min="0" data-pg="${id}" data-own="${own}" value="${esc((c.g||{})[id])}" placeholder="голы">`:''}</div>`).join('')}
+    ${t.length===2?`<button class="sbx" data-act="swap" data-own="${own}" data-k="${k}">${ic('swap',13)} позиции</button>`:''}</div>`};
   const on=new Set([...c.a,...c.b]),rest=c.fixed?[]:o.ids.filter(i=>!on.has(i));
-  return`<div class="card"><h3>${title}</h3>
-  <div class="match">${team('a','Синие','blue')}<div class="vs">vs</div>${team('b','Красные','red')}</div>
-  ${rest.length?`<p class="muted" style="margin:10px 0 0">Отдыхают: ${rest.map(i=>esc(nm(i))).join(', ')}</p>`:''}
-  <div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="mini" data-act="togpg" data-own="${own}">Голы игроков: ${o.pg?'вкл':'выкл'}</button>${!c.fixed&&o.ids.length>=4?`<button class="mini" data-act="fmt" data-own="${own}">${c.a.length===2?'→ 1 на 1':'→ 2 на 2'}</button>`:''}</div><div class="row" style="margin-top:8px"><span class="muted">Игра до</span><select data-chg="setto" data-own="${own}" style="width:auto">${[10,8,7,6,5,3].map(n=>`<option ${+(o.to||10)===n?'selected':''}>${n}</option>`).join('')}</select>${qm('Введите голы проигравших — победителям счёт поставится сам. Можно вписать любой счёт вручную.')}</div>
-<div class="err" id="err_${own}"></div><button class="btn" data-act="saveRes" data-own="${own}">Сохранить результат</button>
-  ${c.bm?'<button class="btn ghost" data-act="closeBr">Отмена</button>':''}</div>`}
+  return`<div class="sbttl">${title}</div>
+  <div class="sb"><div class="sbh"><span class="blue">Синие · ${pa}%</span><span class="red">${100-pa}% · Красные</span></div>
+  <div class="sbm">${side('a','blue')}<div class="sbsc"><input class="sbin blue" type="number" inputmode="numeric" min="0" data-sc="a" data-own="${own}" value="${esc(c.sa)}" placeholder="–"><span>:</span><input class="sbin red" type="number" inputmode="numeric" min="0" data-sc="b" data-own="${own}" value="${esc(c.sb)}" placeholder="–"></div>${side('b','red')}</div></div>
+  <div class="row" style="margin-top:10px;flex-wrap:wrap;gap:6px"><button class="mini" data-act="togpg" data-own="${own}">Голы: ${o.pg?'вкл':'выкл'}</button>${!c.fixed&&o.ids.length>=4?`<button class="mini" data-act="fmt" data-own="${own}">${c.a.length===2?'1 на 1':'2 на 2'}</button>`:''}<span class="grow"></span><span style="display:inline-flex;align-items:center;gap:6px"><span class="muted">до</span><select data-chg="setto" data-own="${own}" style="width:auto;background:var(--card);border-color:transparent;font-weight:700">${[10,8,7,6,5,3].map(n=>`<option ${+(o.to||10)===n?'selected':''}>${n}</option>`).join('')}</select></span>${qm('Введите голы проигравших — победителям счёт поставится сам. Можно вписать любой счёт вручную.')}</div>
+  <div class="err" id="err_${own}"></div><button class="btn" data-act="saveRes" data-own="${own}">Сохранить результат</button>
+  ${c.bm?'<button class="btn ghost" data-act="closeBr">Отмена</button>':''}`}
 function tableHTML(tb,title){if(!tb.some(x=>x.g))return'';const G=tb.some(x=>x.pgn);return`<div class="card"><h3>${title}</h3><table><tr><th>Игрок</th><th>Игр</th><th>Побед</th>${G?'<th>Голы</th>':''}<th>Голы ±</th><th>Рейтинг</th></tr>
   ${tb.map(x=>`<tr><td>${esc(nm(x.id))}</td><td>${x.g}</td><td>${x.w}</td>${G?`<td>${x.pgn?x.pg:'—'}</td>`:''}<td>${x.gd>0?'+':''}${x.gd}</td><td>${sg(x.d)}</td></tr>`).join('')}</table></div>`}
 const topScorer=tb=>tb.filter(x=>x.pg>0).sort((a,b)=>b.pg-a.pg||a.g-b.g)[0];
@@ -336,17 +361,17 @@ function vSession(){const s=activeSession();
   const ck=c=>c?[...c.a,'|',...c.b].join(','):'';let nextBox='';
   if(s.ids.length>=4&&s.cur&&!s.manual&&!thOn){
     if(!s.next||s.nextFor!==ck(s.cur)){s.next=sessNext(s,[...ms,{a:s.cur.a,b:s.cur.b,sa:10,sb:0,kind:s.cur.kind}]);if(s.next){delete s.next.sa;delete s.next.sb}s.nextFor=ck(s.cur);save()}
-    if(s.next){const tn=t=>t.map(i=>esc(nm(i))).join(' & ');nextBox=`<div class="card" style="padding:12px 14px"><span class="muted" style="font-size:13px">Следом${s.next.kind==='clasico'?' · Эль Класико':''}</span><div style="font-weight:600;margin-top:2px">${tn(s.next.a)} <span class="muted" style="font-weight:400">vs</span> ${tn(s.next.b)}</div></div>`}}
-  else if(thOn&&th.step<2){const tn=t=>t.map(i=>esc(nm(i))).join(' & ');nextBox=`<div class="card" style="padding:12px 14px"><span class="muted" style="font-size:13px">Следом · трон</span><div style="font-weight:600;margin-top:2px">${tn(s.throne.champs)} <span class="muted" style="font-weight:400">vs</span> ${tn(s.throne.pairs[th.step+1])}</div></div>`}
+    if(s.next){const tn=t=>t.map(i=>esc(nm(i))).join(' & ');nextBox=nxHTML(s.next.a,s.next.b,s.next.kind==='clasico'?'Эль Класико':'')}}
+  else if(thOn&&th.step<2){const tn=t=>t.map(i=>esc(nm(i))).join(' & ');nextBox=nxHTML(s.throne.champs,s.throne.pairs[th.step+1],'трон')}
   const thBox=thOn?`<div class="banner">${evI('crown','Защита трона · игра '+(th.step+1)+' из 3')}<b>${s.throne.champs.map(i=>esc(nm(i))).join(' & ')}</b>Банк: +${th.bank} каждому, кто свергнет чемпионов<br><button class="mini" style="margin-top:8px" data-act="throneAbort">${CONFIRM==='thr'?'Точно прервать?':'Прервать'}</button></div>`
     :throneCan(s,ms)?`<button class="btn dark" data-act="throneOpen"><span class="ev">${ic('crown',18)} Защита трона</span></button>`:'';
-  const edTitle=s.cur&&s.cur.kind==='throne'?evI('crown',`Трон · игра ${th.step+1} из 3 · банк +${th.bank}`):s.cur&&s.cur.kind==='clasico'?evI('bolt','Эль Класико'):s.manual?'Игра':'Следующая игра';
+  const edTitle=s.cur&&s.cur.kind==='throne'?evI('crown',`Трон · игра ${th.step+1} из 3 · банк +${th.bank}`):s.cur&&s.cur.kind==='clasico'?evI('bolt','Эль Класико'):s.manual?'Игра':'Сейчас играют';
   return`<div class="row between"><h2>Вечер</h2><button class="mini" data-act="editRoster">+ Игрок</button></div>
   <p class="muted" style="margin-top:0">${fmtDate(s.ts)} · хост: ${esc(s.host||'—')} · игроков: ${s.ids.length} · сыграно: ${ms.length}</p>
   <div class="seg"><button class="${s.manual?'':'on'}" data-act="smode" data-m="auto">Авто-подбор</button><button class="${s.manual?'on':''}" data-act="smode" data-m="manual">Свои составы</button>${qm(s.manual?'Выбирайте игроков в списках сами. После игры состав остаётся — удобно для реванша.':'Программа ставит в игру тех, кто дольше ждёт, меняет минимум троих и не даёт играть больше 2 игр подряд. Иногда выпадает Эль Класико.')}</div>
 
-  ${thBox}${s.ids.length<2?'<div class="card">Нужно минимум 2 игрока — нажмите «+ Игрок».</div>':editorHTML('s',s,edTitle)+nextBox}
-  ${tableHTML(ctxTable('s',s.id,s.ids).sort((x,y)=>y.d-x.d),'Таблица вечера')}${gamesList(ms,true)}
+  ${thBox}${s.ids.length<2?'<div class="card">Нужно минимум 2 игрока — нажмите «+ Игрок».</div>':editorHTML('s',s,edTitle)}
+  <div class="tw"><div>${nextBox}</div><div>${tableHTML(ctxTable('s',s.id,s.ids).sort((x,y)=>y.d-x.d),'Таблица вечера')}${gamesList(ms,true)}</div></div>
   <button class="btn danger" data-act="endSession">Завершить вечер</button>`}
 
 function activeTour(){return S.tours.find(t=>t.open)}
